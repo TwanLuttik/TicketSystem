@@ -1,6 +1,5 @@
 package com.twanl.ticketsystem;
 
-import com.twanl.ticketsystem.util.ConfigManager;
 import com.twanl.ticketsystem.util.Strings;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,20 +16,23 @@ public class TicketSystem extends JavaPlugin {
     protected PluginDescriptionFile pdfFile = getDescription();
     private final String PluginVersionOn = ChatColor.GREEN + "(" + pdfFile.getVersion() + ")";
     private final String PluginVersionOff = ChatColor.RED + "(" + pdfFile.getVersion() + ")";
-    public ConfigManager cfgM;
 
     private Connection connection;
-    public String host, database, username, password;
+    public String host, database, username, password, table;
     public int port;
 
 
     public void onEnable() {
-        loadConfigManager();
         LOAD();
         mysqlSetup();
+        loadConfig();
+
+
 
         Bukkit.getConsoleSender().sendMessage(Strings.logName + "Has been enabled " + PluginVersionOn);
     }
+
+
 
     public void onDisable() {
         Bukkit.getConsoleSender().sendMessage(Strings.logName + ChatColor.RED + "Has been disabled " + PluginVersionOff);
@@ -39,31 +41,21 @@ public class TicketSystem extends JavaPlugin {
     public void LOAD() {
 
         // Register listeners
-        //getServer().getPluginManager().registerEvents(new EventsClass(), this);
+        getServer().getPluginManager().registerEvents(new sqlSetterGetter(), this);
 
         // Register commands
         Commands commands = new Commands();
         getCommand("ticket").setExecutor((CommandExecutor) commands);
-
-
-        //LoadConfig
-        getConfig().options().copyDefaults(true);
     }
 
-
-    public void loadConfigManager() {
-        cfgM = new ConfigManager();
-        cfgM.setup();
-        cfgM.savePlayers();
-        cfgM.reloadplayers();
-    }
 
     public void mysqlSetup() {
-        host = "localhost";
-        port = 3306;
-        database = "tickets";
-        username = "root";
-        password = "password";
+        host = this.getConfig().getString("host");
+        port = this.getConfig().getInt("port");
+        database = this.getConfig().getString("database");
+        username = this.getConfig().getString("username");
+        password = this.getConfig().getString("password");
+        table = this.getConfig().getString("table");
 
         try {
             synchronized (this) {
@@ -72,17 +64,17 @@ public class TicketSystem extends JavaPlugin {
                 }
 
                 Class.forName("com.mysql.jdbc.Driver");
-                setConnection( DriverManager.getConnection("jdbc:mysql://" + this.host + ":"
-                        + this.port + "/" + this.database, this.username, this.password ));
+                setConnection(
+                        DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database,
+                                this.username, this.password));
 
-                Bukkit.getConsoleSender().sendMessage(Strings.green + "MYSQL CONNECTED");
+                Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "MYSQL CONNECTED");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-
     }
 
 
@@ -92,5 +84,10 @@ public class TicketSystem extends JavaPlugin {
 
     public void setConnection(Connection connection) {
         this.connection = connection;
+    }
+
+    public void loadConfig(){
+        getConfig().options().copyDefaults(true);
+        saveConfig();
     }
 }
