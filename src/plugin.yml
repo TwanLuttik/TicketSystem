@@ -1,0 +1,9 @@
+main: com.twanl.ticketsystem.TicketSystem
+version: 1.0.0
+name: TicketSystem
+author: T.L
+
+commands:
+  ticket:
+    usage: /<command>
+    aliases: [ts]
