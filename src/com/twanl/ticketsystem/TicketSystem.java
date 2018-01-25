@@ -41,7 +41,7 @@ public class TicketSystem extends JavaPlugin {
     public void LOAD() {
 
         // Register listeners
-        getServer().getPluginManager().registerEvents(new sqlSetterGetter(), this);
+        //getServer().getPluginManager().registerEvents(new sqlSetterGetter(), this);
 
         // Register commands
         Commands commands = new Commands();
